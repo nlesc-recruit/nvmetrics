@@ -4,6 +4,7 @@
 #include <iostream>
 #include <nvperf_cuda_host.h>
 #include <nvperf_host.h>
+#include <vector>
 
 namespace NV {
 namespace Metric {
