@@ -15,7 +15,6 @@ extern "C" PyObject *measureMetricStop() {
 
   PyGILState_STATE gstate = PyGILState_Ensure();
 
-
   PyObject *result = PyList_New(0);
   for (auto value : values) {
     PyList_Append(result, PyFloat_FromDouble(value));

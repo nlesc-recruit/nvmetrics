@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-//#include <FileOp.h>
+// #include <FileOp.h>
 
 #define NVPW_API_CALL(apiFuncCall)                                             \
   do {                                                                         \
@@ -281,7 +281,6 @@ double measureMetricsStart(std::vector<std::string> newMetricNames) {
 //   return measureMetricStop();
 //}
 
-
 extern "C" double measureMetricStopPrint() {
 
   runTestEnd();
@@ -315,14 +314,14 @@ extern "C" void measureDRAMBytesStart() {
 
 extern "C" void measureL2BytesStart() {
   measureMetricsStart({"lts__t_sectors_srcunit_tex_op_read.sum",
-                      "lts__t_sectors_srcunit_tex_op_write.sum"});
+                       "lts__t_sectors_srcunit_tex_op_write.sum"});
 }
 std::vector<double> measureDRAMBytesStop() {
   auto values = measureMetricsStop();
   return values;
 }
 
-std::vector<double> measureL2BytesStop() {  
+std::vector<double> measureL2BytesStop() {
   auto values = measureMetricsStop();
   values[0] *= 32;
   values[1] *= 32;
