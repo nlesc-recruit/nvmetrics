@@ -1,14 +1,15 @@
-#include "Parser.h"
+#ifndef NV_METRIC_CONFIG_H_
+#define NV_METRIC_CONFIG_H_
+
 #include "ScopeExit.h"
-#include "Utils.h"
+#include "parser.h"
+#include "utils.h"
 #include <iostream>
 #include <nvperf_cuda_host.h>
 #include <nvperf_host.h>
 #include <vector>
 
-namespace NV {
-namespace Metric {
-namespace Config {
+namespace NV::Metric::Config {
 
 bool GetRawMetricRequests(std::string chipName,
                           const std::vector<std::string> &metricNames,
@@ -233,6 +234,6 @@ bool GetCounterDataPrefixImage(
   return true;
 }
 
-} // namespace Config
-} // namespace Metric
-} // namespace NV
+} // namespace NV::Metric::Config
+
+#endif // NV_METRIC_CONFIG_H_

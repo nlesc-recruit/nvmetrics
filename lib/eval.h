@@ -1,6 +1,9 @@
-#include "Parser.h"
+#ifndef NV_METRIC_EVAL_H_
+#define NV_METRIC_EVAL_H_
+
 #include "ScopeExit.h"
-#include "Utils.h"
+#include "parser.h"
+#include "utils.h"
 #include <iomanip>
 #include <iostream>
 #include <nvperf_cuda_host.h>
@@ -8,9 +11,7 @@
 #include <nvperf_target.h>
 #include <vector>
 
-namespace NV {
-namespace Metric {
-namespace Eval {
+namespace NV::Metric::Eval {
 struct MetricNameValue {
   std::string metricName;
   int numRanges;
@@ -46,13 +47,6 @@ bool PrintMetricValues(std::string chipName,
                        const std::vector<uint8_t> &counterDataImage,
                        const std::vector<std::string> &metricNames,
                        const uint8_t *pCounterAvailabilityImage = NULL);
-} // namespace Eval
-} // namespace Metric
-} // namespace NV
-
-namespace NV {
-namespace Metric {
-namespace Eval {
 
 std::string GetHwUnit(const std::string &metricName) {
   return metricName.substr(0, metricName.find("__", 0));
@@ -448,6 +442,6 @@ GetMetricValues(std::string chipName,
   return metricValues;
 }
 
-} // namespace Eval
-} // namespace Metric
-} // namespace NV
+} // namespace NV::Metric::Eval
+
+#endif // NV_METRIC_EVAL_H_

@@ -1,8 +1,5 @@
-#ifndef __MEASUREMETRICPW_H_
-#define __MEASUREMETRICPW_H_
-
-#include "Eval.hpp"
-#include "Metric.hpp"
+#include "config.h"
+#include "eval.h"
 #include <cuda.h>
 #include <cupti_profiler_target.h>
 #include <cupti_target.h>
@@ -11,7 +8,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-// #include <FileOp.h>
 
 #define NVPW_API_CALL(apiFuncCall)                                             \
   do {                                                                         \
@@ -53,11 +49,9 @@
     }                                                                          \
   } while (0)
 
+namespace {
 static int numRanges = 2;
 
-#endif // __MEASUREMETRICPW_H_
-
-namespace {
 CUcontext cuContext;
 
 CUdevice cuDevice;
@@ -69,7 +63,6 @@ std::vector<uint8_t> counterDataImagePrefix;
 std::vector<uint8_t> configImage;
 std::vector<uint8_t> counterDataScratchBuffer;
 std::vector<uint8_t> counterAvailabilityImage;
-} // namespace
 
 bool CreateCounterDataImage(std::vector<uint8_t> &counterDataImage,
                             std::vector<uint8_t> &counterDataScratchBuffer,
@@ -190,13 +183,15 @@ bool runTestEnd() {
   return true;
 }
 
+} // namespace
+
+namespace nvmetrics {
 bool static initialized = false;
 
 double measureMetricsStart(std::vector<std::string> newMetricNames) {
 
   if (!initialized) {
     initialized = true;
-    cudaFree(0);
   }
   int deviceNum = 0;
   int computeCapabilityMajor = 0, computeCapabilityMinor = 0;
@@ -274,56 +269,12 @@ double measureMetricsStart(std::vector<std::string> newMetricNames) {
   return 0.0;
 }
 
-// double measureMetric(std::function<double()> runPass,
-//                      std::vector<std::string> metricNames) {
-//   measureMetricStart(metricNames);
-//   runPass();
-//   return measureMetricStop();
-//}
-
-extern "C" double measureMetricStopPrint() {
-
-  runTestEnd();
-
-  // CUpti_Profiler_DeInitialize_Params profilerDeInitializeParams = {
-  //     CUpti_Profiler_DeInitialize_Params_STRUCT_SIZE};
-  // CUPTI_API_CALL(cuptiProfilerDeInitialize(&profilerDeInitializeParams));
-
-  NV::Metric::Eval::PrintMetricValues(chipName, counterDataImage, metricNames);
-
-  return 0.0;
-}
-
 std::vector<double> measureMetricsStop() {
-
   runTestEnd();
-
-  // CUpti_Profiler_DeInitialize_Params profilerDeInitializeParams = {
-  //     CUpti_Profiler_DeInitialize_Params_STRUCT_SIZE};
-  // CUPTI_API_CALL(cuptiProfilerDeInitialize(&profilerDeInitializeParams));
 
   auto results = NV::Metric::Eval::GetMetricValues(chipName, counterDataImage,
                                                    metricNames);
   return results;
 }
-void initMeasureMetric(){};
 
-extern "C" void measureDRAMBytesStart() {
-  measureMetricsStart({"dram__bytes_read.sum", "dram__bytes_write.sum"});
-}
-
-extern "C" void measureL2BytesStart() {
-  measureMetricsStart({"lts__t_sectors_srcunit_tex_op_read.sum",
-                       "lts__t_sectors_srcunit_tex_op_write.sum"});
-}
-std::vector<double> measureDRAMBytesStop() {
-  auto values = measureMetricsStop();
-  return values;
-}
-
-std::vector<double> measureL2BytesStop() {
-  auto values = measureMetricsStop();
-  values[0] *= 32;
-  values[1] *= 32;
-  return values;
-}
+} // namespace nvmetrics

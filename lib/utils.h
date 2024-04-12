@@ -1,4 +1,6 @@
-#pragma once
+#ifndef NV_METRIC_UTILS_H_
+#define NV_METRIC_UTILS_H_
+
 #include <nvperf_host.h>
 
 #define RETURN_IF_NVPW_ERROR(retval, actual)                                   \
@@ -11,9 +13,7 @@
     }                                                                          \
   } while (0)
 
-namespace NV {
-namespace Metric {
-namespace Utils {
+namespace NV::Metric::Utils {
 
 static const char *GetNVPWResultString(NVPA_Status status) {
   const char *errorMsg = NULL;
@@ -96,6 +96,6 @@ static const char *GetNVPWResultString(NVPA_Status status) {
 
   return errorMsg;
 }
-} // namespace Utils
-} // namespace Metric
-} // namespace NV
+} // namespace NV::Metric::Utils
+
+#endif // NV_METRIC_UTILS_H_

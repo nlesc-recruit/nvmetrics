@@ -1,10 +1,9 @@
-#pragma once
+#ifndef NV_METRIC_PARSER_H_
+#define NV_METRIC_PARSER_H_
 
 #include <string>
 
-namespace NV {
-namespace Metric {
-namespace Parser {
+namespace NV::Metric::Parser {
 inline bool ParseMetricNameString(const std::string &metricName,
                                   std::string *reqName, bool *isolated,
                                   bool *keepInstances) {
@@ -54,6 +53,6 @@ inline bool ParseMetricNameString(const std::string &metricName,
 
   return true;
 }
-} // namespace Parser
-} // namespace Metric
-} // namespace NV
+} // namespace NV::Metric::Parser
+
+#endif // NV_METRIC_PARSER_H_

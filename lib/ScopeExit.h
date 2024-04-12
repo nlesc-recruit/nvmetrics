@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SCOPE_EXIT_H_
+#define SCOPE_EXIT_H_
 
 template <typename T>
 
@@ -20,3 +21,5 @@ template <typename T> ScopeExit<T> MoveScopeExit(T t) {
 #define SCOPE_EXIT(func)                                                       \
   const auto NV_ANONYMOUS_VARIABLE_INDIRECT(EXIT, __LINE__) =                  \
       MoveScopeExit([=]() { func; })
+
+#endif // SCOPE_EXIT_H_

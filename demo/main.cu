@@ -1,4 +1,4 @@
-#include "measureMetricPW.hpp"
+#include <nv_metrics.h>
 
 #include <cassert>
 #include <cuda_runtime.h>
@@ -61,9 +61,9 @@ int main() {
   int threadsPerBlock = 256;
   int blocksPerGrid = (N + threadsPerBlock - 1) / threadsPerBlock;
 
-  measureMetricsStart(metrics);
+  nvmetrics::measureMetricsStart(metrics);
   kernel<<<blocksPerGrid, threadsPerBlock>>>(d_a, d_b, d_c, N, scale);
-  auto res = measureMetricsStop();
+  auto res = nvmetrics::measureMetricsStop();
   assert(metrics.size() == res.size());
 
   for (int i = 0; i < res.size(); i++) {
