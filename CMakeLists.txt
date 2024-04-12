@@ -16,6 +16,6 @@ target_link_libraries(CUDA::cupti INTERFACE ${CUDA_nvperf_target_LIBRARY})
 
 add_executable(${PROJECT_NAME} main.cu)
 
-target_link_libraries(${PROJECT_NAME} CUDA::cupti)
+target_link_libraries(${PROJECT_NAME} CUDA::cuda_driver CUDA::cupti)
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CUDA_ARCHITECTURES OFF)
