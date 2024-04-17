@@ -1,6 +1,11 @@
 #ifndef NV_METRIC_UTILS_H_
 #define NV_METRIC_UTILS_H_
 
+#include <sstream>
+
+#include <cuda.h>
+#include <cuda_runtime.h>
+#include <cupti_profiler_target.h>
 #include <nvperf_host.h>
 
 #define RETURN_IF_NVPW_ERROR(retval, actual)                                   \
@@ -8,14 +13,14 @@
     NVPA_Status status = actual;                                               \
     if (NVPA_STATUS_SUCCESS != status) {                                       \
       fprintf(stderr, "FAILED: %s with error %s\n", #actual,                   \
-              NV::Metric::Utils::GetNVPWResultString(status));                 \
+              NV::Metric::Utils::nvpwGetErrorMessage(status));                 \
       return retval;                                                           \
     }                                                                          \
   } while (0)
 
 namespace NV::Metric::Utils {
 
-static const char *GetNVPWResultString(NVPA_Status status) {
+static const char *nvpwGetErrorMessage(NVPA_Status status) {
   const char *errorMsg = NULL;
   switch (status) {
   case NVPA_STATUS_ERROR:
@@ -96,6 +101,62 @@ static const char *GetNVPWResultString(NVPA_Status status) {
 
   return errorMsg;
 }
+
+inline void THROW_RUNTIME_ERROR(const char *apiFuncCall, const char *message,
+                                const char *file, int line) {
+  std::stringstream errorMsg;
+  errorMsg << file << ":" << line << ": error: function " << apiFuncCall
+           << " failed with error " << message << ".\n";
+  throw std::runtime_error(errorMsg.str());
+}
+
+inline void checkNVPWError(NVPA_Status status, const char *apiFuncCall,
+                           const char *file, int line) {
+  if (status != NVPA_STATUS_SUCCESS) {
+    const char *message = NV::Metric::Utils::nvpwGetErrorMessage(status);
+    THROW_RUNTIME_ERROR(apiFuncCall, message, file, line);
+  }
+}
+
+inline void checkCUPTIError(CUptiResult status, const char *apiFuncCall,
+                            const char *file, int line) {
+  if (status != CUPTI_SUCCESS) {
+    const char *message = nullptr;
+    cuptiGetErrorMessage(status, &message);
+    THROW_RUNTIME_ERROR(apiFuncCall, message, file, line);
+  }
+}
+
+inline void checkDriverError(CUresult status, const char *apiFuncCall,
+                             const char *file, int line) {
+  if (status != CUDA_SUCCESS) {
+    const char *message = nullptr;
+    cuGetErrorString(status, &message);
+    THROW_RUNTIME_ERROR(apiFuncCall, message, file, line);
+  }
+}
+
+inline void checkRuntimeError(cudaError_t status, const char *apiFuncCall,
+                              const char *file, int line) {
+  if (status != cudaSuccess) {
+    const char *message = cudaGetErrorString(status);
+    THROW_RUNTIME_ERROR(apiFuncCall, message, file, line);
+  }
+}
+
 } // namespace NV::Metric::Utils
+
+#define NVPW_API_CALL(apiFuncCall)                                             \
+  NV::Metric::Utils::checkNVPWError(apiFuncCall, #apiFuncCall, __FILE__,       \
+                                    __LINE__)
+#define CUPTI_API_CALL(apiFuncCall)                                            \
+  NV::Metric::Utils::checkCUPTIError(apiFuncCall, #apiFuncCall, __FILE__,      \
+                                     __LINE__)
+#define DRIVER_API_CALL(apiFuncCall)                                           \
+  NV::Metric::Utils::checkDriverError(apiFuncCall, #apiFuncCall, __FILE__,     \
+                                      __LINE__)
+#define RUNTIME_API_CALL(apiFuncCall)                                          \
+  NV::Metric::Utils::checkRuntimeError(apiFuncCall, #apiFuncCall, __FILE__,    \
+                                       __LINE__)
 
 #endif // NV_METRIC_UTILS_H_

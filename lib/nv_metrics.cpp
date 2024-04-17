@@ -1,53 +1,12 @@
 #include "config.h"
 #include "eval.h"
-#include <cuda.h>
-#include <cupti_profiler_target.h>
+#include "utils.h"
 #include <cupti_target.h>
 #include <functional>
 #include <nvperf_host.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-
-#define NVPW_API_CALL(apiFuncCall)                                             \
-  do {                                                                         \
-    NVPA_Status _status = apiFuncCall;                                         \
-    if (_status != NVPA_STATUS_SUCCESS) {                                      \
-      fprintf(stderr, "%s:%d: error: function %s failed with error %d.\n",     \
-              __FILE__, __LINE__, #apiFuncCall, _status);                      \
-      exit(-1);                                                                \
-    }                                                                          \
-  } while (0)
-
-#define CUPTI_API_CALL(apiFuncCall)                                            \
-  do {                                                                         \
-    CUptiResult _status = apiFuncCall;                                         \
-    if (_status != CUPTI_SUCCESS) {                                            \
-      fprintf(stderr, "%s:%d: error: function %s failed with error %d.\n",     \
-              __FILE__, __LINE__, #apiFuncCall, _status);                      \
-      exit(-1);                                                                \
-    }                                                                          \
-  } while (0)
-
-#define DRIVER_API_CALL(apiFuncCall)                                           \
-  do {                                                                         \
-    CUresult _status = apiFuncCall;                                            \
-    if (_status != CUDA_SUCCESS) {                                             \
-      fprintf(stderr, "%s:%d: error: function %s failed with error %d.\n",     \
-              __FILE__, __LINE__, #apiFuncCall, _status);                      \
-      exit(-1);                                                                \
-    }                                                                          \
-  } while (0)
-
-#define RUNTIME_API_CALL(apiFuncCall)                                          \
-  do {                                                                         \
-    cudaError_t _status = apiFuncCall;                                         \
-    if (_status != cudaSuccess) {                                              \
-      fprintf(stderr, "%s:%d: error: function %s failed with error %s.\n",     \
-              __FILE__, __LINE__, #apiFuncCall, cudaGetErrorString(_status));  \
-      exit(-1);                                                                \
-    }                                                                          \
-  } while (0)
 
 namespace {
 static int numRanges = 2;
