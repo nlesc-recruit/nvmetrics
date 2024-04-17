@@ -9,14 +9,14 @@
 #include <nvperf_host.h>
 
 #define RETURN_IF_NVPW_ERROR(retval, actual)                                   \
-  do {                                                                         \
+  {                                                                            \
     NVPA_Status status = actual;                                               \
     if (NVPA_STATUS_SUCCESS != status) {                                       \
       fprintf(stderr, "FAILED: %s with error %s\n", #actual,                   \
               NV::Metric::Utils::nvpwGetErrorMessage(status));                 \
       return retval;                                                           \
     }                                                                          \
-  } while (0)
+  }
 
 namespace NV::Metric::Utils {
 
