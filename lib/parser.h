@@ -13,8 +13,6 @@ inline bool ParseMetricNameString(const std::string &metricName,
     return false;
   }
 
-  // boost program_options sometimes inserts a \n between the metric name and a
-  // '&' at the end
   size_t pos = name.find('\n');
   if (pos != std::string::npos) {
     name.erase(pos, 1);
