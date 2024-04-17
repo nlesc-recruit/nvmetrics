@@ -207,7 +207,6 @@ bool GetCounterDataPrefixImage(
   RETURN_IF_NVPW_ERROR(false,
                        NVPW_CounterDataBuilder_AddMetrics(&addMetricsParams));
 
-  // size_t counterDataPrefixSize = 0;
   NVPW_CounterDataBuilder_GetCounterDataPrefix_Params
       getCounterDataPrefixParams = {
           NVPW_CounterDataBuilder_GetCounterDataPrefix_Params_STRUCT_SIZE};

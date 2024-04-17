@@ -14,7 +14,6 @@ namespace NV::Metric::Eval {
 struct MetricNameValue {
   std::string metricName;
   int numRanges;
-  // <rangeName , metricValue> pair
   std::vector<std::pair<std::string, double>> rangeNameMetricValueMap;
 };
 
@@ -356,12 +355,6 @@ GetMetricValues(std::string chipName,
   RETURN_IF_NVPW_ERROR(metricValues,
                        NVPW_CounterData_GetNumRanges(&getNumRangesParams));
 
-  // std::cout << "\n" << std::setw(40) << std::left << "Range Name"
-  //           << std::setw(100) << std::left        << "Metric Name"
-  //           << "Metric Value" << std::endl;
-  // std::cout << std::setfill('-') << std::setw(160) << "" << std::setfill(' ')
-  // << std::endl;
-
   std::string reqName;
   bool isolated = true;
   bool keepInstances = true;
@@ -427,8 +420,6 @@ GetMetricValues(std::string chipName,
       evaluateToGpuValuesParams.pMetricValues = &metricValue;
       NVPW_MetricsEvaluator_EvaluateToGpuValues(&evaluateToGpuValuesParams);
 
-      // std::cout << std::setw(40) << std::left << rangeName << std::setw(100)
-      //           << std::left << metricName << metricValue << std::endl;
       metricValues.push_back(metricValue);
     }
   }

@@ -93,9 +93,6 @@ bool runTestStart(CUdevice cuDevice, std::vector<uint8_t> &configImage,
                   std::vector<uint8_t> &counterDataImage,
                   CUpti_ProfilerReplayMode profilerReplayMode,
                   CUpti_ProfilerRange profilerRange) {
-
-  // DRIVER_API_CALL(cuCtxCreate(&cuContext, 0, cuDevice));
-
   CUpti_Profiler_BeginSession_Params beginSessionParams = {
       CUpti_Profiler_BeginSession_Params_STRUCT_SIZE};
   CUpti_Profiler_SetConfig_Params setConfigParams = {
@@ -137,8 +134,6 @@ bool runTestEnd() {
       CUpti_Profiler_EndSession_Params_STRUCT_SIZE};
   CUPTI_API_CALL(cuptiProfilerEndSession(&endSessionParams));
 
-  // DRIVER_API_CALL(cuCtxDestroy(cuContext));
-
   return true;
 }
 
@@ -175,7 +170,7 @@ double measureMetricsStart(std::vector<std::string> newMetricNames) {
   CUpti_Profiler_Initialize_Params profilerInitializeParams = {
       CUpti_Profiler_Initialize_Params_STRUCT_SIZE};
   CUPTI_API_CALL(cuptiProfilerInitialize(&profilerInitializeParams));
-  /* Get chip name for the cuda  device */
+  /* Get chip name for the cuda device */
   CUpti_Device_GetChipName_Params getChipNameParams = {
       CUpti_Device_GetChipName_Params_STRUCT_SIZE};
   getChipNameParams.deviceIndex = deviceNum;
