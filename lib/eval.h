@@ -1,7 +1,6 @@
 #ifndef NV_METRIC_EVAL_H_
 #define NV_METRIC_EVAL_H_
 
-#include "ScopeExit.h"
 #include "parser.h"
 #include "utils.h"
 #include <iomanip>

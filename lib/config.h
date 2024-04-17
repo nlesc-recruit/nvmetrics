@@ -1,7 +1,6 @@
 #ifndef NV_METRIC_CONFIG_H_
 #define NV_METRIC_CONFIG_H_
 
-#include "ScopeExit.h"
 #include "parser.h"
 #include "utils.h"
 #include <iostream>
@@ -132,11 +131,6 @@ bool GetConfigImage(std::string chipName,
   NVPW_RawMetricsConfig_Destroy_Params rawMetricsConfigDestroyParams = {
       NVPW_RawMetricsConfig_Destroy_Params_STRUCT_SIZE};
   rawMetricsConfigDestroyParams.pRawMetricsConfig = pRawMetricsConfig;
-  SCOPE_EXIT([&]() {
-    NVPW_RawMetricsConfig_Destroy(
-        (NVPW_RawMetricsConfig_Destroy_Params *)&rawMetricsConfigDestroyParams);
-  });
-
   NVPW_RawMetricsConfig_BeginPassGroup_Params beginPassGroupParams = {
       NVPW_RawMetricsConfig_BeginPassGroup_Params_STRUCT_SIZE};
   beginPassGroupParams.pRawMetricsConfig = pRawMetricsConfig;
@@ -177,6 +171,10 @@ bool GetConfigImage(std::string chipName,
   RETURN_IF_NVPW_ERROR(
       false, NVPW_RawMetricsConfig_GetConfigImage(&getConfigImageParams));
 
+  RETURN_IF_NVPW_ERROR(false, NVPW_RawMetricsConfig_Destroy(
+                                  (NVPW_RawMetricsConfig_Destroy_Params
+                                       *)&rawMetricsConfigDestroyParams));
+
   return true;
 }
 
@@ -200,11 +198,6 @@ bool GetCounterDataPrefixImage(
       NVPW_CounterDataBuilder_Destroy_Params_STRUCT_SIZE};
   counterDataBuilderDestroyParams.pCounterDataBuilder =
       counterDataBuilderCreateParams.pCounterDataBuilder;
-  SCOPE_EXIT([&]() {
-    NVPW_CounterDataBuilder_Destroy((NVPW_CounterDataBuilder_Destroy_Params
-                                         *)&counterDataBuilderDestroyParams);
-  });
-
   NVPW_CounterDataBuilder_AddMetrics_Params addMetricsParams = {
       NVPW_CounterDataBuilder_AddMetrics_Params_STRUCT_SIZE};
   addMetricsParams.pCounterDataBuilder =
@@ -230,6 +223,10 @@ bool GetCounterDataPrefixImage(
   getCounterDataPrefixParams.pBuffer = counterDataImagePrefix.data();
   RETURN_IF_NVPW_ERROR(false, NVPW_CounterDataBuilder_GetCounterDataPrefix(
                                   &getCounterDataPrefixParams));
+
+  RETURN_IF_NVPW_ERROR(false, NVPW_CounterDataBuilder_Destroy(
+                                  (NVPW_CounterDataBuilder_Destroy_Params
+                                       *)&counterDataBuilderDestroyParams));
 
   return true;
 }
