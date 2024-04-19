@@ -23,7 +23,7 @@ test-das6:
     - module load ${DAS6_MODULES}
   script:
     - cmake -S . -B build -DCMAKE_INSTALL_PREFIX=install
-    - make -C build
+    - make -C build install
     - ./build/demo/demo
     - module use install/share/modulefiles/
     - module load nvmetrics
