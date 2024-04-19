@@ -1,5 +1,5 @@
 variables:
-  DAS6_MODULES: "spack/12.2.0 cmake cuda python py-pybind11"
+  DAS6_MODULES: "spack/12.2.0 cmake cuda python py-pybind11 py-pip"
 
 stages:
   - linting
@@ -21,6 +21,7 @@ test-das6:
     - das6-gpu
   before_script:
     - module load ${DAS6_MODULES}
+    - python3 -m pip install --user pycuda
   script:
     - cmake -S . -B build -DCMAKE_INSTALL_PREFIX=install
     - make -C build install
