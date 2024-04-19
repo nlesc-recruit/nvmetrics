@@ -160,7 +160,7 @@ void measureMetricsStart(std::vector<std::string>& newMetricNames) {
         "Sample unsupported on Device with compute capability < 7.0\n");
   }
 
-  metricNames = metricNames;
+  metricNames = newMetricNames;
   counterDataImagePrefix = std::vector<uint8_t>();
   configImage = std::vector<uint8_t>();
   counterDataScratchBuffer = std::vector<uint8_t>();
