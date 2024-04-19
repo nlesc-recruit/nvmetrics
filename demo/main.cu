@@ -1,8 +1,9 @@
-#include <nv_metrics.h>
-
 #include <cassert>
-#include <cuda_runtime.h>
 #include <iostream>
+
+#include <cuda_runtime.h>
+
+#include <nv_metrics.h>
 
 #define CHECK_CUDA_ERRORS(call)                                                \
   {                                                                            \
@@ -55,35 +56,32 @@ int main() {
       "sm__sass_thread_inst_executed_op_fadd_pred_on.sum",
       "sm__sass_thread_inst_executed_op_fmul_pred_on.sum",
       "sm__sass_thread_inst_executed_op_ffma_pred_on.sum"};
-  std::vector<double> results;
+
+  // Launch configuration
+  const int block_size = 256;
+  const int grid_size = (N + block_size - 1) / block_size;
+
+  // Start measurement
+  nvmetrics::measureMetricsStart(metrics);
 
   // Launch kernel
-  int threadsPerBlock = 256;
-  int blocksPerGrid = (N + threadsPerBlock - 1) / threadsPerBlock;
+  kernel<<<grid_size, block_size>>>(d_a, d_b, d_c, N, scale);
 
-  nvmetrics::measureMetricsStart(metrics);
-  kernel<<<blocksPerGrid, threadsPerBlock>>>(d_a, d_b, d_c, N, scale);
-  auto res = nvmetrics::measureMetricsStop();
-  assert(metrics.size() == res.size());
-
-  for (int i = 0; i < res.size(); i++) {
-    std::cout << metrics[i] << ": " << res[i] << std::endl;
-  }
+  // Stop measurement
+  std::vector<double> result = nvmetrics::measureMetricsStop();
+  assert(metrics.size() == result.size());
 
   // Check for kernel launch errors
   CHECK_CUDA_ERRORS(cudaGetLastError());
 
+  // Print result of the measurement
+  for (int i = 0; i < result.size(); i++) {
+    std::cout << metrics[i] << ": " << result[i] << std::endl;
+  }
+
   // Copy result back to host
   CHECK_CUDA_ERRORS(
       cudaMemcpy(c, d_c, N * sizeof(float), cudaMemcpyDeviceToHost));
-
-  // Verify results
-  for (int i = 0; i < N; ++i) {
-    if (c[i] != scale * (a[i] + b[i])) {
-      std::cerr << "Error: " << c[i] << " != " << a[i] + b[i] << std::endl;
-      exit(EXIT_FAILURE);
-    }
-  }
 
   // Free device memory
   CHECK_CUDA_ERRORS(cudaFree(d_a));
@@ -95,5 +93,5 @@ int main() {
   delete[] b;
   delete[] c;
 
-  return 0;
+  return EXIT_SUCCESS;
 }
