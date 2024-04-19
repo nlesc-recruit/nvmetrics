@@ -142,7 +142,7 @@ bool runTestEnd() {
 namespace nvmetrics {
 bool static initialized = false;
 
-void measureMetricsStart(std::vector<std::string> newMetricNames) {
+void measureMetricsStart(std::vector<std::string>& newMetricNames) {
   if (!initialized) {
     initialized = true;
   }
