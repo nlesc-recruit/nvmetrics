@@ -9,8 +9,9 @@ target_link_libraries(nvmetrics PUBLIC pybind11::module pybind11::lto
 
 pybind11_extension(nvmetrics)
 
-set_target_properties(nvmetrics PROPERTIES INSTALL_RPATH
-                                           "${CMAKE_INSTALL_PREFIX}/lib")
+set_target_properties(
+  nvmetrics PROPERTIES INSTALL_RPATH
+                       "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 
 install(
   TARGETS nvmetrics
