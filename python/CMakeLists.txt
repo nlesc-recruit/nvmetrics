@@ -14,7 +14,12 @@ target_link_libraries(nvmetrics PUBLIC pybind11::module pybind11::lto
 
 pybind11_extension(nvmetrics)
 
-set_target_properties(nvmetrics PROPERTIES INSTALL_RPATH "lib"
-                                           BUILD_WITH_INSTALL_RPATH TRUE)
+set_target_properties(nvmetrics PROPERTIES INSTALL_RPATH
+                                           "${CMAKE_INSTALL_PREFIX}/lib")
 
-install(TARGETS nvmetrics DESTINATION python)
+install(
+  TARGETS nvmetrics
+  LIBRARY
+    DESTINATION
+      "lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages"
+)
