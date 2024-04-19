@@ -21,5 +21,5 @@ install(
   TARGETS nvmetrics
   LIBRARY
     DESTINATION
-      "lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages"
+      "${CMAKE_INSTALL_LIBDIR}/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages"
 )

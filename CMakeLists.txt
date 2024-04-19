@@ -8,6 +8,8 @@ option(NVMETRICS_BUILD_DEMO "Build with demo" ON)
 find_package(CUDAToolkit REQUIRED)
 include(cmake/cupti.cmake)
 
+include(GNUInstallDirs)
+
 add_subdirectory(lib)
 if(${NVMETRICS_BUILD_PYTHON})
   add_subdirectory(python)
