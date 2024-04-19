@@ -75,7 +75,7 @@ int main() {
     std::vector<std::string> metrics = {"metric1", "metric2", "metric3"};
     
     // Start measuring metrics
-    double start_time = measureMetricsStart(metrics);
+    measureMetricsStart(metrics);
     
     // Perform GPU operations
     

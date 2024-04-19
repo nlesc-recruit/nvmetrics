@@ -142,8 +142,7 @@ bool runTestEnd() {
 namespace nvmetrics {
 bool static initialized = false;
 
-double measureMetricsStart(std::vector<std::string> newMetricNames) {
-
+void measureMetricsStart(std::vector<std::string> newMetricNames) {
   if (!initialized) {
     initialized = true;
   }
@@ -157,11 +156,11 @@ double measureMetricsStart(std::vector<std::string> newMetricNames) {
       &computeCapabilityMinor, CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MINOR,
       cuDevice));
   if (computeCapabilityMajor < 7) {
-    printf("Sample unsupported on Device with compute capability < 7.0\n");
-    return -2.0;
+    throw std::runtime_error(
+        "Sample unsupported on Device with compute capability < 7.0\n");
   }
 
-  metricNames = newMetricNames;
+  metricNames = metricNames;
   counterDataImagePrefix = std::vector<uint8_t>();
   configImage = std::vector<uint8_t>();
   counterDataScratchBuffer = std::vector<uint8_t>();
@@ -197,22 +196,19 @@ double measureMetricsStart(std::vector<std::string> newMetricNames) {
   if (metricNames.size()) {
     if (!NV::Metric::Config::GetConfigImage(chipName, metricNames, configImage,
                                             counterAvailabilityImage.data())) {
-      std::cout << "Failed to create configImage" << std::endl;
-      return -1.0;
+      throw std::runtime_error("Failed to create configImage");
     }
     if (!NV::Metric::Config::GetCounterDataPrefixImage(
             chipName, metricNames, counterDataImagePrefix)) {
-      std::cout << "Failed to create counterDataImagePrefix" << std::endl;
-      return -1.0;
+      throw std::runtime_error("Failed to create counterDataImagePrefix");
     }
   } else {
-    std::cout << "No metrics provided to profile" << std::endl;
-    return -1.0;
+    throw std::runtime_error("No metrics provided to profile");
   }
 
   if (!CreateCounterDataImage(counterDataImage, counterDataScratchBuffer,
                               counterDataImagePrefix)) {
-    std::cout << "Failed to create counterDataImage" << std::endl;
+    throw std::runtime_error("Failed to create counterDataImage");
   }
 
   CUpti_ProfilerReplayMode profilerReplayMode = CUPTI_KernelReplay;
@@ -220,7 +216,6 @@ double measureMetricsStart(std::vector<std::string> newMetricNames) {
 
   runTestStart(cuDevice, configImage, counterDataScratchBuffer,
                counterDataImage, profilerReplayMode, profilerRange);
-  return 0.0;
 }
 
 std::vector<double> measureMetricsStop() {
