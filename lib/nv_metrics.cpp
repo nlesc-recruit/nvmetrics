@@ -23,7 +23,7 @@ std::vector<uint8_t> configImage;
 std::vector<uint8_t> counterDataScratchBuffer;
 std::vector<uint8_t> counterAvailabilityImage;
 
-bool CreateCounterDataImage(std::vector<uint8_t> &counterDataImage,
+void CreateCounterDataImage(std::vector<uint8_t> &counterDataImage,
                             std::vector<uint8_t> &counterDataScratchBuffer,
                             std::vector<uint8_t> &counterDataImagePrefix) {
 
@@ -84,11 +84,9 @@ bool CreateCounterDataImage(std::vector<uint8_t> &counterDataImage,
 
   CUPTI_API_CALL(cuptiProfilerCounterDataImageInitializeScratchBuffer(
       &initScratchBufferParams));
-
-  return true;
 }
 
-bool runTestStart(CUdevice cuDevice, std::vector<uint8_t> &configImage,
+void runTestStart(CUdevice cuDevice, std::vector<uint8_t> &configImage,
                   std::vector<uint8_t> &counterDataScratchBuffer,
                   std::vector<uint8_t> &counterDataImage,
                   CUpti_ProfilerReplayMode profilerReplayMode,
@@ -119,10 +117,9 @@ bool runTestStart(CUdevice cuDevice, std::vector<uint8_t> &configImage,
   setConfigParams.passIndex = 0;
   CUPTI_API_CALL(cuptiProfilerSetConfig(&setConfigParams));
   CUPTI_API_CALL(cuptiProfilerEnableProfiling(&enableProfilingParams));
-  return true;
 }
 
-bool runTestEnd() {
+void runTestEnd() {
   CUpti_Profiler_DisableProfiling_Params disableProfilingParams = {
       CUpti_Profiler_DisableProfiling_Params_STRUCT_SIZE};
   CUPTI_API_CALL(cuptiProfilerDisableProfiling(&disableProfilingParams));
@@ -133,19 +130,13 @@ bool runTestEnd() {
   CUpti_Profiler_EndSession_Params endSessionParams = {
       CUpti_Profiler_EndSession_Params_STRUCT_SIZE};
   CUPTI_API_CALL(cuptiProfilerEndSession(&endSessionParams));
-
-  return true;
 }
 
 } // namespace
 
 namespace nvmetrics {
-bool static initialized = false;
 
-void measureMetricsStart(std::vector<std::string>& newMetricNames) {
-  if (!initialized) {
-    initialized = true;
-  }
+void measureMetricsStart(std::vector<std::string> &newMetricNames) {
   int deviceNum = 0;
   int computeCapabilityMajor = 0, computeCapabilityMinor = 0;
   DRIVER_API_CALL(cuDeviceGet(&cuDevice, deviceNum));
@@ -206,10 +197,8 @@ void measureMetricsStart(std::vector<std::string>& newMetricNames) {
     throw std::runtime_error("No metrics provided to profile");
   }
 
-  if (!CreateCounterDataImage(counterDataImage, counterDataScratchBuffer,
-                              counterDataImagePrefix)) {
-    throw std::runtime_error("Failed to create counterDataImage");
-  }
+  CreateCounterDataImage(counterDataImage, counterDataScratchBuffer,
+                         counterDataImagePrefix);
 
   CUpti_ProfilerReplayMode profilerReplayMode = CUPTI_KernelReplay;
   CUpti_ProfilerRange profilerRange = CUPTI_AutoRange;
