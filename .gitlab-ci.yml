@@ -1,0 +1,30 @@
+variables:
+  DAS6_MODULES: "spack/12.2.0 cmake cuda python"
+
+stages:
+  - linting
+  - test
+
+format:
+  stage: linting
+  image: ubuntu:22.04
+  before_script:
+    - apt-get update -qq
+    - apt-get install -y -qq git python3-pip
+    - pip3 install clang-format==14.0.0 cmake-format black pre-commit
+  script:
+    - pre-commit run -a
+
+test-das6:
+  stage: test
+  tags:
+    - das6-gpu
+  before_script:
+    - module load ${DAS6_MODULES}
+  script:
+    - cmake -S . -B build -DCMAKE_INSTALL_PREFIX=install
+    - make -C build
+    - ./build/demo/demo
+    - module use install/share/modulefiles/
+    - module load nvmetrics
+    - python3 demo/demo.py
