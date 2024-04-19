@@ -6,14 +6,16 @@ import pycuda.autoinit
 import pycuda.driver as cuda
 from pycuda.compiler import SourceModule
 
-module = SourceModule("""
+module = SourceModule(
+    """
 __global__ void vector_add(float *a, float *b, float *c, int n, int scale)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < n)
         c[idx] += scale * (a[idx] + b[idx]);
 }
-""")
+"""
+)
 
 if __name__ == "__main__":
     n = 1024
@@ -40,7 +42,7 @@ if __name__ == "__main__":
     metrics = [
         "sm__sass_thread_inst_executed_op_fadd_pred_on.sum",
         "sm__sass_thread_inst_executed_op_fmul_pred_on.sum",
-        "sm__sass_thread_inst_executed_op_ffma_pred_on.sum"
+        "sm__sass_thread_inst_executed_op_ffma_pred_on.sum",
     ]
 
     # Load kernel
@@ -50,7 +52,15 @@ if __name__ == "__main__":
     nvmetrics.measureMetricsStart(metrics)
 
     # Launch kernel
-    vector_add(a_gpu, b_gpu, c_gpu, np.int32(n), np.int32(2), block=(block_size, 1, 1), grid=(grid_size, 1))
+    vector_add(
+        a_gpu,
+        b_gpu,
+        c_gpu,
+        np.int32(n),
+        np.int32(2),
+        block=(block_size, 1, 1),
+        grid=(grid_size, 1),
+    )
 
     # Stop measurement
     results = nvmetrics.measureMetricsStop()
