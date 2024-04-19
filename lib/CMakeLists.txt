@@ -12,7 +12,8 @@ find_library(CUDA_nvperf_host_LIBRARY libnvperf_host.so
 target_link_libraries(CUDA::cupti INTERFACE ${CUDA_nvperf_host_LIBRARY})
 target_link_libraries(CUDA::cupti INTERFACE ${CUDA_nvperf_target_LIBRARY})
 
-add_library(${PROJECT_NAME} SHARED nv_metrics.cpp)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+add_library(${PROJECT_NAME} STATIC nv_metrics.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE CUDA::cuda_driver CUDA::cupti)
 target_include_directories(${PROJECT_NAME}
                            INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
