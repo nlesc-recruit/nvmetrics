@@ -1,0 +1,17 @@
+#%Module
+
+# Set variables from CMake
+set root            @CMAKE_INSTALL_PREFIX@
+
+# Set environment variables
+setenv          NVMETRICS_ROOT      $root
+setenv          NVMETRICS_LIB       $root/@CMAKE_INSTALL_LIBDIR@
+setenv          NVMETRICS_INCLUDE   $root/@CMAKE_INSTALL_INCLUDEDIR@
+
+# Add libraries to path
+prepend-path    LD_LIBRARY_PATH     $root/@CMAKE_INSTALL_LIBDIR@
+
+# Add python to path
+if { @NVMETRICS_BUILD_PYTHON@ eq "ON" } {
+    prepend-path    PYTHONPATH      $root/@CMAKE_INSTALL_LIBDIR@/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages
+}
