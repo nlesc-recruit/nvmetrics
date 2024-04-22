@@ -1,5 +1,4 @@
 #include <iomanip>
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -20,8 +19,7 @@ GetMetricValues(std::string chipName,
                 const uint8_t *pCounterAvailabilityImage) {
   std::vector<double> metricValues;
   if (!counterDataImage.size()) {
-    std::cout << "Counter Data Image is empty!\n";
-    return metricValues;
+    throw std::runtime_error("Counter Data Image is empty!");
   }
 
   NVPW_CUDA_MetricsEvaluator_CalculateScratchBufferSize_Params
