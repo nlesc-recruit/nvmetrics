@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include <cupti_target.h>
+// #include <nvperf_cuda_host.h>
 #include <nvperf_host.h>
 
 #include "config.h"
@@ -157,7 +158,8 @@ void InitializeCUDA(int deviceNum) {
   }
 }
 
-void InitializeCUPTI(std::vector<std::string> newMetricNames) {
+void InitializeCUPTI(
+    std::vector<std::string> newMetricNames = std::vector<std::string>()) {
   metricNames = newMetricNames;
   counterDataImagePrefix = std::vector<uint8_t>();
   configImage = std::vector<uint8_t>();
@@ -191,21 +193,17 @@ void InitializeCUPTI(std::vector<std::string> newMetricNames) {
   NVPW_InitializeHost_Params initializeHostParams = {
       NVPW_InitializeHost_Params_STRUCT_SIZE};
   NVPW_API_CALL(NVPW_InitializeHost(&initializeHostParams));
-  if (metricNames.size()) {
-    try {
-      configImage = NV::Metric::Config::GetConfigImage(
-          chipName, metricNames, counterAvailabilityImage.data());
-    } catch (std::runtime_error &e) {
-      throw std::runtime_error("Failed to create configImage");
-    }
-    try {
-      counterDataImagePrefix =
-          NV::Metric::Config::GetCounterDataPrefixImage(chipName, metricNames);
-    } catch (std::runtime_error &e) {
-      throw std::runtime_error("Failed to create counterDataImagePrefix");
-    }
-  } else {
-    throw std::runtime_error("No metrics provided to profile");
+  try {
+    configImage = NV::Metric::Config::GetConfigImage(
+        chipName, metricNames, counterAvailabilityImage.data());
+  } catch (std::runtime_error &e) {
+    throw std::runtime_error("Failed to create configImage");
+  }
+  try {
+    counterDataImagePrefix =
+        NV::Metric::Config::GetCounterDataPrefixImage(chipName, metricNames);
+  } catch (std::runtime_error &e) {
+    throw std::runtime_error("Failed to create counterDataImagePrefix");
   }
 
   CreateCounterDataImage(counterDataImage, counterDataScratchBuffer,
@@ -215,6 +213,7 @@ void InitializeCUPTI(std::vector<std::string> newMetricNames) {
 void measureMetricsStart(std::vector<std::string> &metricNames, int deviceNum) {
   if (!initialized) {
     InitializeCUDA(deviceNum);
+    initialized = true;
   }
 
   InitializeCUPTI(metricNames);
@@ -233,4 +232,39 @@ std::vector<double> measureMetricsStop() {
                                            metricNames);
 }
 
+std::vector<std::string> queryMetrics(NVPW_MetricType metricType,
+                                      int deviceNum) {
+  if (!initialized) {
+    InitializeCUDA(deviceNum);
+    initialized = true;
+  }
+
+  InitializeCUPTI();
+
+  std::vector<uint8_t> scratchBuffer;
+  NVPW_MetricsEvaluator *metricEvaluator =
+      NV::Metric::Config::GetMetricsEvaluator(chipName, scratchBuffer,
+                                              counterAvailabilityImage.data());
+
+  NVPW_MetricsEvaluator_GetMetricNames_Params metricEvaluatorMetricNamesParams;
+  metricEvaluatorMetricNamesParams.structSize =
+      NVPW_MetricsEvaluator_GetMetricNames_Params_STRUCT_SIZE;
+  metricEvaluatorMetricNamesParams.pPriv = NULL;
+  metricEvaluatorMetricNamesParams.pMetricsEvaluator = metricEvaluator;
+  metricEvaluatorMetricNamesParams.metricType = metricType;
+  NVPW_API_CALL(
+      NVPW_MetricsEvaluator_GetMetricNames(&metricEvaluatorMetricNamesParams));
+
+  std::vector<std::string> metricNames;
+
+  for (int i = 0; i < metricEvaluatorMetricNamesParams.numMetrics; i++) {
+    const size_t pMetricNameBeginIndex =
+        metricEvaluatorMetricNamesParams.pMetricNameBeginIndices[i];
+    const char *pMetricName =
+        &metricEvaluatorMetricNamesParams.pMetricNames[pMetricNameBeginIndex];
+    metricNames.push_back(std::string(pMetricName));
+  }
+
+  return metricNames;
+}
 } // namespace nvmetrics
