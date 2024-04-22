@@ -7,6 +7,50 @@
 #include "parser.h"
 #include "utils.h"
 
+namespace {
+std::vector<const char *>
+GetRawMetricNames(const std::string &reqName,
+                  NVPW_MetricsEvaluator *metricEvaluator) {
+  std::vector<const char *> rawMetricNames;
+
+  NVPW_MetricEvalRequest metricEvalRequest;
+  NVPW_MetricsEvaluator_ConvertMetricNameToMetricEvalRequest_Params
+      convertMetricToEvalRequest = {
+          NVPW_MetricsEvaluator_ConvertMetricNameToMetricEvalRequest_Params_STRUCT_SIZE};
+  convertMetricToEvalRequest.pMetricsEvaluator = metricEvaluator;
+  convertMetricToEvalRequest.pMetricName = reqName.c_str();
+  convertMetricToEvalRequest.pMetricEvalRequest = &metricEvalRequest;
+  convertMetricToEvalRequest.metricEvalRequestStructSize =
+      NVPW_MetricEvalRequest_STRUCT_SIZE;
+  NVPW_API_CALL(NVPW_MetricsEvaluator_ConvertMetricNameToMetricEvalRequest(
+      &convertMetricToEvalRequest));
+
+  std::vector<const char *> rawDependencies;
+  NVPW_MetricsEvaluator_GetMetricRawDependencies_Params
+      getMetricRawDependenciesParms = {
+          NVPW_MetricsEvaluator_GetMetricRawDependencies_Params_STRUCT_SIZE};
+  getMetricRawDependenciesParms.pMetricsEvaluator = metricEvaluator;
+  getMetricRawDependenciesParms.pMetricEvalRequests = &metricEvalRequest;
+  getMetricRawDependenciesParms.numMetricEvalRequests = 1;
+  getMetricRawDependenciesParms.metricEvalRequestStructSize =
+      NVPW_MetricEvalRequest_STRUCT_SIZE;
+  getMetricRawDependenciesParms.metricEvalRequestStrideSize =
+      sizeof(NVPW_MetricEvalRequest);
+  NVPW_API_CALL(NVPW_MetricsEvaluator_GetMetricRawDependencies(
+      &getMetricRawDependenciesParms));
+  rawDependencies.resize(getMetricRawDependenciesParms.numRawDependencies);
+  getMetricRawDependenciesParms.ppRawDependencies = rawDependencies.data();
+  NVPW_API_CALL(NVPW_MetricsEvaluator_GetMetricRawDependencies(
+      &getMetricRawDependenciesParms));
+
+  for (size_t i = 0; i < rawDependencies.size(); ++i) {
+    rawMetricNames.push_back(rawDependencies[i]);
+  }
+
+  return rawMetricNames;
+}
+} // namespace
+
 namespace NV::Metric::Config {
 
 void GetRawMetricRequests(std::string chipName,
@@ -36,55 +80,29 @@ void GetRawMetricRequests(std::string chipName,
   NVPW_MetricsEvaluator *metricEvaluator =
       metricEvaluatorInitializeParams.pMetricsEvaluator;
 
-  bool isolated = true;
-  bool keepInstances = true;
   std::vector<const char *> rawMetricNames;
   for (auto &metricName : metricNames) {
-    std::string reqName;
-    NV::Metric::Parser::ParseMetricNameString(metricName, &reqName, &isolated,
-                                              &keepInstances);
-    keepInstances = true;
-    NVPW_MetricEvalRequest metricEvalRequest;
-    NVPW_MetricsEvaluator_ConvertMetricNameToMetricEvalRequest_Params
-        convertMetricToEvalRequest = {
-            NVPW_MetricsEvaluator_ConvertMetricNameToMetricEvalRequest_Params_STRUCT_SIZE};
-    convertMetricToEvalRequest.pMetricsEvaluator = metricEvaluator;
-    convertMetricToEvalRequest.pMetricName = reqName.c_str();
-    convertMetricToEvalRequest.pMetricEvalRequest = &metricEvalRequest;
-    convertMetricToEvalRequest.metricEvalRequestStructSize =
-        NVPW_MetricEvalRequest_STRUCT_SIZE;
-    NVPW_API_CALL(NVPW_MetricsEvaluator_ConvertMetricNameToMetricEvalRequest(
-        &convertMetricToEvalRequest));
+    try {
+      std::string reqName;
+      bool isolated = true;
+      bool keepInstances = true;
+      NV::Metric::Parser::ParseMetricNameString(metricName, &reqName, &isolated,
+                                                &keepInstances);
 
-    std::vector<const char *> rawDependencies;
-    NVPW_MetricsEvaluator_GetMetricRawDependencies_Params
-        getMetricRawDependenciesParms = {
-            NVPW_MetricsEvaluator_GetMetricRawDependencies_Params_STRUCT_SIZE};
-    getMetricRawDependenciesParms.pMetricsEvaluator = metricEvaluator;
-    getMetricRawDependenciesParms.pMetricEvalRequests = &metricEvalRequest;
-    getMetricRawDependenciesParms.numMetricEvalRequests = 1;
-    getMetricRawDependenciesParms.metricEvalRequestStructSize =
-        NVPW_MetricEvalRequest_STRUCT_SIZE;
-    getMetricRawDependenciesParms.metricEvalRequestStrideSize =
-        sizeof(NVPW_MetricEvalRequest);
-    NVPW_API_CALL(NVPW_MetricsEvaluator_GetMetricRawDependencies(
-        &getMetricRawDependenciesParms));
-    rawDependencies.resize(getMetricRawDependenciesParms.numRawDependencies);
-    getMetricRawDependenciesParms.ppRawDependencies = rawDependencies.data();
-    NVPW_API_CALL(NVPW_MetricsEvaluator_GetMetricRawDependencies(
-        &getMetricRawDependenciesParms));
+      for (auto &rawMetricName :
+           ::GetRawMetricNames(reqName, metricEvaluator)) {
+        rawMetricNames.push_back(rawMetricName);
 
-    for (size_t i = 0; i < rawDependencies.size(); ++i) {
-      rawMetricNames.push_back(rawDependencies[i]);
+        NVPA_RawMetricRequest metricRequest = {
+            NVPA_RAW_METRIC_REQUEST_STRUCT_SIZE};
+        metricRequest.pMetricName = rawMetricName;
+        metricRequest.isolated = isolated;
+        metricRequest.keepInstances = keepInstances;
+        rawMetricRequests.push_back(metricRequest);
+      }
+    } catch (std::runtime_error &e) {
+      // Skip invalid metrics
     }
-  }
-
-  for (auto &rawMetricName : rawMetricNames) {
-    NVPA_RawMetricRequest metricRequest = {NVPA_RAW_METRIC_REQUEST_STRUCT_SIZE};
-    metricRequest.pMetricName = rawMetricName;
-    metricRequest.isolated = isolated;
-    metricRequest.keepInstances = keepInstances;
-    rawMetricRequests.push_back(metricRequest);
   }
 
   NVPW_MetricsEvaluator_Destroy_Params metricEvaluatorDestroyParams = {
