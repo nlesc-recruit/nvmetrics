@@ -9,7 +9,8 @@ PYBIND11_MODULE(nvmetrics, m) {
   m.doc() = "Pybind11 interface for nv_metrics library";
 
   m.def("measureMetricsStart", &nvmetrics::measureMetricsStart,
-        "Start measuring metrics");
+        "Start measuring metrics", py::arg("metricNames"),
+        py::arg("deviceNum") = 0);
   m.def("measureMetricsStop", &nvmetrics::measureMetricsStop,
         "Stop measuring metrics");
 }
