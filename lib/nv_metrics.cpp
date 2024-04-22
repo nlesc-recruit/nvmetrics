@@ -1,6 +1,8 @@
 #include "config.h"
 #include "eval.h"
 #include "utils.h"
+#include <cupti_events.h>
+#include <cupti_metrics.h>
 #include <cupti_target.h>
 #include <functional>
 #include <nvperf_host.h>
@@ -11,6 +13,7 @@
 namespace {
 static int numRanges = 2;
 
+int cuDeviceNum;
 CUcontext cuContext;
 
 CUdevice cuDevice;
@@ -135,9 +138,10 @@ void runTestEnd() {
 } // namespace
 
 namespace nvmetrics {
+bool static initialized = false;
 
-void measureMetricsStart(std::vector<std::string> &newMetricNames,
-                         int deviceNum) {
+void InitializeCUDA(int deviceNum) {
+  cuDeviceNum = deviceNum;
   int computeCapabilityMajor = 0, computeCapabilityMinor = 0;
   DRIVER_API_CALL(cuDeviceGet(&cuDevice, deviceNum));
   DRIVER_API_CALL(cuDeviceGetAttribute(
@@ -150,7 +154,9 @@ void measureMetricsStart(std::vector<std::string> &newMetricNames,
     throw std::runtime_error(
         "Sample unsupported on Device with compute capability < 7.0\n");
   }
+}
 
+void InitializeCUPTI(std::vector<std::string> newMetricNames) {
   metricNames = newMetricNames;
   counterDataImagePrefix = std::vector<uint8_t>();
   configImage = std::vector<uint8_t>();
@@ -163,7 +169,7 @@ void measureMetricsStart(std::vector<std::string> &newMetricNames,
   /* Get chip name for the cuda device */
   CUpti_Device_GetChipName_Params getChipNameParams = {
       CUpti_Device_GetChipName_Params_STRUCT_SIZE};
-  getChipNameParams.deviceIndex = deviceNum;
+  getChipNameParams.deviceIndex = cuDeviceNum;
   CUPTI_API_CALL(cuptiDeviceGetChipName(&getChipNameParams));
   chipName = getChipNameParams.pChipName;
 
@@ -199,6 +205,14 @@ void measureMetricsStart(std::vector<std::string> &newMetricNames,
 
   CreateCounterDataImage(counterDataImage, counterDataScratchBuffer,
                          counterDataImagePrefix);
+}
+
+void measureMetricsStart(std::vector<std::string> &metricNames, int deviceNum) {
+  if (!initialized) {
+    InitializeCUDA(deviceNum);
+  }
+
+  InitializeCUPTI(metricNames);
 
   CUpti_ProfilerReplayMode profilerReplayMode = CUPTI_KernelReplay;
   CUpti_ProfilerRange profilerRange = CUPTI_AutoRange;
@@ -210,9 +224,8 @@ void measureMetricsStart(std::vector<std::string> &newMetricNames,
 std::vector<double> measureMetricsStop() {
   runTestEnd();
 
-  auto results = NV::Metric::Eval::GetMetricValues(chipName, counterDataImage,
-                                                   metricNames);
-  return results;
+  return NV::Metric::Eval::GetMetricValues(chipName, counterDataImage,
+                                           metricNames);
 }
 
 } // namespace nvmetrics
