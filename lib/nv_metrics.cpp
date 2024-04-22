@@ -191,12 +191,16 @@ void InitializeCUPTI(std::vector<std::string> newMetricNames) {
       NVPW_InitializeHost_Params_STRUCT_SIZE};
   NVPW_API_CALL(NVPW_InitializeHost(&initializeHostParams));
   if (metricNames.size()) {
-    if (!NV::Metric::Config::GetConfigImage(chipName, metricNames, configImage,
-                                            counterAvailabilityImage.data())) {
+    try {
+      NV::Metric::Config::GetConfigImage(chipName, metricNames, configImage,
+                                         counterAvailabilityImage.data());
+    } catch (std::runtime_error &e) {
       throw std::runtime_error("Failed to create configImage");
     }
-    if (!NV::Metric::Config::GetCounterDataPrefixImage(
-            chipName, metricNames, counterDataImagePrefix)) {
+    try {
+      NV::Metric::Config::GetCounterDataPrefixImage(chipName, metricNames,
+                                                    counterDataImagePrefix);
+    } catch (std::runtime_error &e) {
       throw std::runtime_error("Failed to create counterDataImagePrefix");
     }
   } else {
