@@ -136,8 +136,8 @@ void runTestEnd() {
 
 namespace nvmetrics {
 
-void measureMetricsStart(std::vector<std::string> &newMetricNames) {
-  int deviceNum = 0;
+void measureMetricsStart(std::vector<std::string> &newMetricNames,
+                         int deviceNum) {
   int computeCapabilityMajor = 0, computeCapabilityMinor = 0;
   DRIVER_API_CALL(cuDeviceGet(&cuDevice, deviceNum));
   DRIVER_API_CALL(cuDeviceGetAttribute(
