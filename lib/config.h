@@ -15,7 +15,7 @@ namespace NV::Metric::Config {
  * by utilizing NVIDIA's Performance Tools Interface (NVPW) for CUDA Metrics.
  * Raw metric requests are essential for subsequent metric collection and analysis.
  *
- * \param[in]  chipName[in]               The name of the GPU chip for which to get metric values.
+ * \param[in]  chipName                   The name of the GPU chip for which to get metric values.
  * \param[in]  metricNames                A list of metrics to read from the counter data image.
  * \param[in]  pCounterAvailabilityImage  A pointer to the counter availability image queried on
  *                                        the target device.
