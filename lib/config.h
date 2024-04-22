@@ -35,14 +35,13 @@ GetRawMetricRequests(std::string chipName,
  *
  * \param[in]  chipName                   The name of the GPU chip for which to get metric values.
  * \param[in]  metricNames                A list of metrics to read from the counter data image.
- * \param[out] configImage                An output vector where the configuration image will be stored.
  * \param[in]  pCounterAvailabilityImage  A pointer to the counter availability image queried on
  *                                        the target device.
+ * \return     configImage                A vector with the configuration image.
  * clang-format on */
-void GetConfigImage(std::string chipName,
-                    const std::vector<std::string> &metricNames,
-                    std::vector<uint8_t> &configImage,
-                    const uint8_t *pCounterAvailabilityImage);
+std::vector<uint8_t> GetConfigImage(std::string chipName,
+                                    const std::vector<std::string> &metricNames,
+                                    const uint8_t *pCounterAvailabilityImage);
 
 /* clang-format off
  * \brief Retrieves the counter data prefix image for specified GPU chip and metrics.

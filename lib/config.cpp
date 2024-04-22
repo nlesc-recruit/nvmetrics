@@ -113,10 +113,9 @@ GetRawMetricRequests(std::string chipName,
   return rawMetricRequests;
 }
 
-void GetConfigImage(std::string chipName,
-                    const std::vector<std::string> &metricNames,
-                    std::vector<uint8_t> &configImage,
-                    const uint8_t *pCounterAvailabilityImage) {
+std::vector<uint8_t> GetConfigImage(std::string chipName,
+                                    const std::vector<std::string> &metricNames,
+                                    const uint8_t *pCounterAvailabilityImage) {
   std::vector<NVPA_RawMetricRequest> rawMetricRequests =
       GetRawMetricRequests(chipName, metricNames, pCounterAvailabilityImage);
 
@@ -175,13 +174,15 @@ void GetConfigImage(std::string chipName,
   getConfigImageParams.pBuffer = NULL;
   NVPW_API_CALL(NVPW_RawMetricsConfig_GetConfigImage(&getConfigImageParams));
 
-  configImage.resize(getConfigImageParams.bytesCopied);
+  std::vector<uint8_t> configImage(getConfigImageParams.bytesCopied);
   getConfigImageParams.bytesAllocated = configImage.size();
   getConfigImageParams.pBuffer = configImage.data();
   NVPW_API_CALL(NVPW_RawMetricsConfig_GetConfigImage(&getConfigImageParams));
 
   NVPW_API_CALL(NVPW_RawMetricsConfig_Destroy(
       (NVPW_RawMetricsConfig_Destroy_Params *)&rawMetricsConfigDestroyParams));
+
+  return configImage;
 }
 
 void GetCounterDataPrefixImage(

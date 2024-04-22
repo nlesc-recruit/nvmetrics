@@ -193,8 +193,8 @@ void InitializeCUPTI(std::vector<std::string> newMetricNames) {
   NVPW_API_CALL(NVPW_InitializeHost(&initializeHostParams));
   if (metricNames.size()) {
     try {
-      NV::Metric::Config::GetConfigImage(chipName, metricNames, configImage,
-                                         counterAvailabilityImage.data());
+      configImage = NV::Metric::Config::GetConfigImage(
+          chipName, metricNames, counterAvailabilityImage.data());
     } catch (std::runtime_error &e) {
       throw std::runtime_error("Failed to create configImage");
     }
