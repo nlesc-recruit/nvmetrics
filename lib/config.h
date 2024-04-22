@@ -17,14 +17,14 @@ namespace NV::Metric::Config {
  *
  * \param[in]  chipName[in]               The name of the GPU chip for which to get metric values.
  * \param[in]  metricNames                A list of metrics to read from the counter data image.
- * \param[out] rawMetricRequests          An output vector where the raw metric requests will be stored.
  * \param[in]  pCounterAvailabilityImage  A pointer to the counter availability image queried on
  *                                        the target device.
+ * \return     rawMetricRequests          A vector with the raw metric requests.
  * clang-format on */
-void GetRawMetricRequests(std::string chipName,
-                          const std::vector<std::string> &metricNames,
-                          std::vector<NVPA_RawMetricRequest> &rawMetricRequests,
-                          const uint8_t *pCounterAvailabilityImage);
+std::vector<NVPA_RawMetricRequest>
+GetRawMetricRequests(std::string chipName,
+                     const std::vector<std::string> &metricNames,
+                     const uint8_t *pCounterAvailabilityImage);
 
 /* clang-format off
  * \brief Generates a configuration image for specified GPU chip and metrics.

@@ -53,10 +53,10 @@ GetRawMetricNames(const std::string &reqName,
 
 namespace NV::Metric::Config {
 
-void GetRawMetricRequests(std::string chipName,
-                          const std::vector<std::string> &metricNames,
-                          std::vector<NVPA_RawMetricRequest> &rawMetricRequests,
-                          const uint8_t *pCounterAvailabilityImage) {
+std::vector<NVPA_RawMetricRequest>
+GetRawMetricRequests(std::string chipName,
+                     const std::vector<std::string> &metricNames,
+                     const uint8_t *pCounterAvailabilityImage) {
   NVPW_CUDA_MetricsEvaluator_CalculateScratchBufferSize_Params
       calculateScratchBufferSizeParam = {
           NVPW_CUDA_MetricsEvaluator_CalculateScratchBufferSize_Params_STRUCT_SIZE};
@@ -80,7 +80,8 @@ void GetRawMetricRequests(std::string chipName,
   NVPW_MetricsEvaluator *metricEvaluator =
       metricEvaluatorInitializeParams.pMetricsEvaluator;
 
-  std::vector<const char *> rawMetricNames;
+  std::vector<NVPA_RawMetricRequest> rawMetricRequests;
+
   for (auto &metricName : metricNames) {
     try {
       std::string reqName;
@@ -91,7 +92,6 @@ void GetRawMetricRequests(std::string chipName,
 
       for (auto &rawMetricName :
            ::GetRawMetricNames(reqName, metricEvaluator)) {
-        rawMetricNames.push_back(rawMetricName);
 
         NVPA_RawMetricRequest metricRequest = {
             NVPA_RAW_METRIC_REQUEST_STRUCT_SIZE};
@@ -109,15 +109,16 @@ void GetRawMetricRequests(std::string chipName,
       NVPW_MetricsEvaluator_Destroy_Params_STRUCT_SIZE};
   metricEvaluatorDestroyParams.pMetricsEvaluator = metricEvaluator;
   NVPW_API_CALL(NVPW_MetricsEvaluator_Destroy(&metricEvaluatorDestroyParams));
+
+  return rawMetricRequests;
 }
 
 void GetConfigImage(std::string chipName,
                     const std::vector<std::string> &metricNames,
                     std::vector<uint8_t> &configImage,
                     const uint8_t *pCounterAvailabilityImage) {
-  std::vector<NVPA_RawMetricRequest> rawMetricRequests;
-  GetRawMetricRequests(chipName, metricNames, rawMetricRequests,
-                       pCounterAvailabilityImage);
+  std::vector<NVPA_RawMetricRequest> rawMetricRequests =
+      GetRawMetricRequests(chipName, metricNames, pCounterAvailabilityImage);
 
   NVPW_CUDA_RawMetricsConfig_Create_V2_Params rawMetricsConfigCreateParams = {
       NVPW_CUDA_RawMetricsConfig_Create_V2_Params_STRUCT_SIZE};
@@ -187,9 +188,8 @@ void GetCounterDataPrefixImage(
     std::string chipName, const std::vector<std::string> &metricNames,
     std::vector<uint8_t> &counterDataImagePrefix,
     const uint8_t *pCounterAvailabilityImage = NULL) {
-  std::vector<NVPA_RawMetricRequest> rawMetricRequests;
-  GetRawMetricRequests(chipName, metricNames, rawMetricRequests,
-                       pCounterAvailabilityImage);
+  std::vector<NVPA_RawMetricRequest> rawMetricRequests =
+      GetRawMetricRequests(chipName, metricNames, pCounterAvailabilityImage);
 
   NVPW_CUDA_CounterDataBuilder_Create_Params counterDataBuilderCreateParams = {
       NVPW_CUDA_CounterDataBuilder_Create_Params_STRUCT_SIZE};
