@@ -52,8 +52,7 @@ GetMetricValues(std::string chipName,
   NVPW_CounterData_GetNumRanges_Params getNumRangesParams = {
       NVPW_CounterData_GetNumRanges_Params_STRUCT_SIZE};
   getNumRangesParams.pCounterDataImage = counterDataImage.data();
-  RETURN_IF_NVPW_ERROR(metricValues,
-                       NVPW_CounterData_GetNumRanges(&getNumRangesParams));
+  NVPW_API_CALL(NVPW_CounterData_GetNumRanges(&getNumRangesParams));
 
   std::string reqName;
   bool isolated = true;
@@ -127,8 +126,8 @@ GetMetricValues(std::string chipName,
   NVPW_MetricsEvaluator_Destroy_Params metricEvaluatorDestroyParams = {
       NVPW_MetricsEvaluator_Destroy_Params_STRUCT_SIZE};
   metricEvaluatorDestroyParams.pMetricsEvaluator = metricEvaluator;
-  RETURN_IF_NVPW_ERROR(metricValues, NVPW_MetricsEvaluator_Destroy(
-                                         &metricEvaluatorDestroyParams));
+  NVPW_API_CALL(NVPW_MetricsEvaluator_Destroy(&metricEvaluatorDestroyParams));
+
   return metricValues;
 }
 

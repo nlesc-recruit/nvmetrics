@@ -7,17 +7,6 @@
 #include <cuda_runtime.h>
 #include <cupti_profiler_target.h>
 #include <nvperf_host.h>
-
-#define RETURN_IF_NVPW_ERROR(retval, actual)                                   \
-  {                                                                            \
-    NVPA_Status status = actual;                                               \
-    if (NVPA_STATUS_SUCCESS != status) {                                       \
-      fprintf(stderr, "FAILED: %s with error %s\n", #actual,                   \
-              NV::Metric::Utils::nvpwGetErrorMessage(status));                 \
-      return retval;                                                           \
-    }                                                                          \
-  }
-
 namespace NV::Metric::Utils {
 
 static const char *nvpwGetErrorMessage(NVPA_Status status) {
