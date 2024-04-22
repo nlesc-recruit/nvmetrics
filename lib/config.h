@@ -9,6 +9,23 @@
 namespace NV::Metric::Config {
 
 /* clang-format off
+ * \brief Retrieves a metrics evaluator for the specified chip.
+ *
+ * This function retrieves a metrics evaluator for the specified chip,
+ * utilizing the provided scratch buffer and counter availability image.
+ *
+ * \param[in]  chipName                  The name of the GPU chip for which to get metric values.
+ * \param[in]  scratchBuffer             The scratch buffer to be used by the metrics evaluator.
+ * \param[in]  pCounterAvailabilityImage A pointer to the counter availability image queried
+ *                                       on the target device.
+ *
+ * \return     metricEvalutor            A pointer to the metrics evaluator.
+ * clang-format on */
+NVPW_MetricsEvaluator *
+GetMetricsEvaluator(std::string chipName, std::vector<uint8_t> &scratchBuffer,
+                    const uint8_t *pCounterAvailabilityImage);
+
+/* clang-format off
  * \brief Retrieves raw metric requests for the specified chip and metric names.
  *
  * This function retrieves raw metric requests for the specified chip and metric names
