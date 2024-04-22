@@ -199,8 +199,8 @@ void InitializeCUPTI(std::vector<std::string> newMetricNames) {
       throw std::runtime_error("Failed to create configImage");
     }
     try {
-      NV::Metric::Config::GetCounterDataPrefixImage(chipName, metricNames,
-                                                    counterDataImagePrefix);
+      counterDataImagePrefix =
+          NV::Metric::Config::GetCounterDataPrefixImage(chipName, metricNames);
     } catch (std::runtime_error &e) {
       throw std::runtime_error("Failed to create counterDataImagePrefix");
     }

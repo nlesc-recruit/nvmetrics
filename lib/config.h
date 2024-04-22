@@ -52,14 +52,14 @@ std::vector<uint8_t> GetConfigImage(std::string chipName,
  *
  * \param[in]  chipName                   The name of the GPU chip for which to get metric values.
  * \param[in]  metricNames                A list of metrics to read from the counter data image.
- * \param[out] counterDataImagePrefix     An output vector where the counter data prefix image will be stored.
  * \param[in]  pCounterAvailabilityImage  A pointer to the counter availability image queried on
  *                                        the target device.
+ * \return     counterDataImagePrefix     A vector with the counter data prefix image.
  * clang-format on */
-void GetCounterDataPrefixImage(std::string chipName,
-                               const std::vector<std::string> &metricNames,
-                               std::vector<uint8_t> &counterDataImagePrefix,
-                               const uint8_t *pCounterAvailabilityImage = NULL);
+std::vector<uint8_t>
+GetCounterDataPrefixImage(std::string chipName,
+                          const std::vector<std::string> &metricNames,
+                          const uint8_t *pCounterAvailabilityImage = NULL);
 
 } // namespace NV::Metric::Config
 
