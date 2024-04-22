@@ -1,14 +1,15 @@
+#include <string>
+#include <vector>
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <cupti_target.h>
+#include <nvperf_host.h>
+
 #include "config.h"
 #include "eval.h"
 #include "utils.h"
-#include <cupti_events.h>
-#include <cupti_metrics.h>
-#include <cupti_target.h>
-#include <functional>
-#include <nvperf_host.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
 
 namespace {
 static int numRanges = 2;
