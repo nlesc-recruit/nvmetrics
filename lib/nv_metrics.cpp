@@ -5,7 +5,6 @@
 #include <stdlib.h>
 
 #include <cupti_target.h>
-// #include <nvperf_cuda_host.h>
 #include <nvperf_host.h>
 
 #include "config.h"
