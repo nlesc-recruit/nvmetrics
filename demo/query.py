@@ -1,7 +1,5 @@
 import nvmetrics
 
-import pycuda.autoinit
-
 if __name__ == "__main__":
     def print_metrics(metric_type, metrics):
         print("#" * 80)
