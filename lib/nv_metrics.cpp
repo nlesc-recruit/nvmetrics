@@ -142,6 +142,7 @@ namespace nvmetrics {
 bool static initialized = false;
 
 void InitializeCUDA(int deviceNum) {
+  DRIVER_API_CALL(cuInit(0));
   cuDeviceNum = deviceNum;
   int computeCapabilityMajor = 0, computeCapabilityMinor = 0;
   DRIVER_API_CALL(cuDeviceGet(&cuDevice, deviceNum));
@@ -155,6 +156,8 @@ void InitializeCUDA(int deviceNum) {
     throw std::runtime_error(
         "Sample unsupported on Device with compute capability < 7.0\n");
   }
+  DRIVER_API_CALL(
+      cuCtxCreate(&cuContext, CU_CTX_SCHED_BLOCKING_SYNC, cuDevice));
 }
 
 void InitializeCUPTI(
