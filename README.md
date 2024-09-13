@@ -57,7 +57,7 @@ make -C build
 4. (Optional) Install the library:
 
 ```bash
-make install
+make -C build install
 ```
 
 ## Usage
